@@ -1,18 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'
+import api from './services/api'
+
+import './global.css'
+import './App.css'
+import './Sidebar.css'
+import './Main.css'
+
+import DevItem from './components/DevItem'
+import DevForm from './components/DevForm'
 
 function App() {
+  
+  const [devs, setDevs] = useState([])
+  
+  useEffect(() => {
+    async function loadDevs() {
+      const response = await api.get('/devs')
 
-  const [counter, setCounter] = useState(0)
+      setDevs(response.data)
+    }
 
-  function incrementCounter(){
-    setCounter(counter + 1)
+    loadDevs()
+  }, [])
+
+  async function handleAddDev(data) {
+    const response = await api.post('/devs', data)
+
+    //Cria array, adiciona todos os devs existentes + o dev criado no final do array
+    setDevs([...devs, response.data])
   }
-
+  
   return (
-    <>
-      <h1>Contador: {counter}</h1>
-      <button onClick={incrementCounter}>Incrementar</button>
-    </>
+    <div id="app">
+      <aside>
+        <strong>Cadastrar</strong>
+        <DevForm onSubmit={handleAddDev}/>
+      </aside>
+      <main>
+        <ul>
+          {devs.map(dev => (
+            <DevItem key={dev._id} dev={dev}/>
+          ))}
+        </ul>
+      </main>
+    </div>
   );
 }
 
